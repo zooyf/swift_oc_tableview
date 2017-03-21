@@ -90,29 +90,36 @@ import UIKit
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        do {
-            if let file = Bundle.main.url(forResource: "countries", withExtension: "json") {
-                let data = try Data(contentsOf: file)
-                let json = try JSONSerialization.jsonObject(with: data, options: [])
-                if let object = json as? [String: Any] {
-                    // json is a dictionary
-                    print(object)
-                } else if let object = json as? [String] {
-                    // json is an array
-                    let dict = sortData(object as NSArray)
-                    self.dataDict = dict
-                    self.capitalArray = dict.keys.sorted()
-                    self.tableView.reloadData()
-                    print(self.capitalArray)
-                    
+        DispatchQueue.global().async {
+            
+            do {
+                if let file = Bundle.main.url(forResource: "countries", withExtension: "json") {
+                    let data = try Data(contentsOf: file)
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    if let object = json as? [String: Any] {
+                        // json is a dictionary
+                        print(object)
+                    } else if let object = json as? [String] {
+                        // json is an array
+                        let dict = self.sortData(object as NSArray)
+                        self.dataDict = dict
+                        self.capitalArray = dict.keys.sorted()
+                        print(self.capitalArray)
+                        
+                        DispatchQueue.main.async {
+                            self.tableView.reloadData()
+                            
+                        }
+                    } else {
+                        print("JSON is invalid")
+                    }
                 } else {
-                    print("JSON is invalid")
+                    print("no file")
                 }
-            } else {
-                print("no file")
+            } catch {
+                print(error.localizedDescription)
             }
-        } catch {
-            print(error.localizedDescription)
+
         }
         
         self.edgesForExtendedLayout = []
